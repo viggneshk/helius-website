@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StorePro Ops — Delinquency & Lien Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Epilogue:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2126;
+    --border: #2a2d35;
+    --accent: #e8c46a;
+    --accent2: #5b8aff;
+    --accent3: #ff6b5b;
+    --accent4: #4ecf8e;
+    --text: #f0f0ee;
+    --text-dim: #8a8f9e;
+    --text-faint: #4a4f5e;
+    --red: #ff4d4d;
+    --orange: #ff8c42;
+    --yellow: #e8c46a;
+    --green: #4ecf8e;
+    --blue: #5b8aff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Epilogue', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+  }
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo .logo-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .nav-section {
+    padding: 16px 12px 8px;
+  }
+  .nav-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 0 8px;
+    margin-bottom: 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    font-size: 13px;
+    font-weight: 400;
+    margin-bottom: 2px;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: rgba(232,196,106,0.12);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .nav-item .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-family: 'DM Mono', monospace;
+  }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .facility-switcher {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.15s;
+  }
+  .facility-switcher:hover { border-color: var(--accent); }
+  .facility-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .facility-count { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
+
+  /* MAIN */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topbar-title h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: 0.01em;
+  }
+  .topbar-title p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 1px;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Epilogue', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #111;
+  }
+  .btn-primary:hover { background: #f0d080; }
+  .btn-outline {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--text-dim); color: var(--text); }
+  .btn-danger {
+    background: rgba(255,77,77,0.12);
+    color: var(--red);
+    border: 1px solid rgba(255,77,77,0.25);
+  }
+  .btn-danger:hover { background: rgba(255,77,77,0.2); }
+
+  /* CONTENT */
+  .content { padding: 28px; flex: 1; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+    width: fit-content;
+    margin-bottom: 24px;
+  }
+  .tab {
+    padding: 7px 16px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    border: none;
+    background: transparent;
+    font-family: 'Epilogue', sans-serif;
+  }
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* METRICS ROW */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .metric-card:hover { border-color: var(--accent); }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .metric-card.red::before { background: var(--red); }
+  .metric-card.orange::before { background: var(--orange); }
+  .metric-card.green::before { background: var(--green); }
+  .metric-card.blue::before { background: var(--blue); }
+  .metric-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .metric-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .metric-sub {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .metric-sub .up { color: var(--green); }
+  .metric-sub .down { color: var(--red); }
+
+  /* GRID LAYOUT */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .card-subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .card-body { padding: 16px 20px; }
+
+  /* PIPELINE / KANBAN */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .pipeline-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .pipeline-col-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pipeline-col-name {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+  }
+  .pipeline-count {
+    background: var(--surface2);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+  .pipeline-col.stage-1 .pipeline-col-header { border-top: 2px solid #ff6b5b; }
+  .pipeline-col.stage-2 .pipeline-col-header { border-top: 2px solid #ff8c42; }
+  .pipeline-col.stage-3 .pipeline-col-header { border-top: 2px solid #e8c46a; }
+  .pipeline-col.stage-4 .pipeline-col-header { border-top: 2px solid #5b8aff; }
+  .pipeline-col.stage-5 .pipeline-col-header { border-top: 2px solid #a78bfa; }
+  .pipeline-col.stage-6 .pipeline-col-header { border-top: 2px solid #4ecf8e; }
+  .pipeline-cards { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .p-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .p-card:hover { border-color: var(--accent); }
+  .p-card-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .p-card-name { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .p-card-days {
+    margin-top: 6px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    padding: 1px 5px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .p-card-days.d-low { background: rgba(255,107,91,0.15); color: #ff6b5b; }
+  .p-card-days.d-mid { background: rgba(255,140,66,0.15); color: #ff8c42; }
+  .p-card-days.d-high { background: rgba(91,138,255,0.15); color: #5b8aff; }
+  .p-card-days.d-done { background: rgba(78,207,142,0.15); color: #4ecf8e; }
+  .p-card-amount {
+    float: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    margin-top: 2px;
+  }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  thead th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  tbody tr:hover { background: var(--surface2); }
+  tbody tr:last-child { border-bottom: none; }
+  td {
+    padding: 11px 14px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+  td.mono { font-family: 'DM Mono', monospace; }
+  td.dim { color: var(--text-dim); }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: 'DM Mono', monospace;
+  }
+  .badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .badge-red { background: rgba(255,77,77,0.12); color: var(--red); }
+  .badge-orange { background: rgba(255,140,66,0.12); color: var(--orange); }
+  .badge-yellow { background: rgba(232,196,106,0.12); color: var(--yellow); }
+  .badge-blue { background: rgba(91,138,255,0.12); color: var(--blue); }
+  .badge-purple { background: rgba(167,139,250,0.12); color: #a78bfa; }
+  .badge-green { background: rgba(78,207,142,0.12); color: var(--green); }
+  .badge-gray { background: rgba(138,143,158,0.12); color: var(--text-dim); }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin-bottom: 14px; }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 11px;
+  }
+  .progress-label { color: var(--text-dim); }
+  .progress-val { font-family: 'DM Mono', monospace; color: var(--text); font-weight: 500; }
+  .progress-track {
+    height: 5px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* TIMELINE */
+  .timeline { padding: 0; }
+  .tl-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .tl-dot.done { background: rgba(78,207,142,0.15); color: var(--green); border: 1px solid rgba(78,207,142,0.3); }
+  .tl-dot.pending { background: rgba(232,196,106,0.12); color: var(--yellow); border: 1px solid rgba(232,196,106,0.3); }
+  .tl-dot.alert { background: rgba(255,77,77,0.12); color: var(--red); border: 1px solid rgba(255,77,77,0.3); }
+  .tl-dot.future { background: var(--surface2); color: var(--text-faint); border: 1px solid var(--border); }
+  .tl-body { flex: 1; }
+  .tl-action { font-size: 12px; font-weight: 500; color: var(--text); }
+  .tl-detail { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .tl-date { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-faint); margin-top: 3px; }
+
+  /* CALCULATOR */
+  .calc-section { display: none; }
+  .calc-section.active { display: block; }
+  .calc-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+  }
+  .form-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    transition: border-color 0.15s;
+    outline: none;
+    width: 100%;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--text-faint); }
+  .calc-results {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .calc-result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .calc-result-row:last-child { border-bottom: none; }
+  .calc-result-label { color: var(--text-dim); }
+  .calc-result-val {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .calc-total {
+    background: rgba(232,196,106,0.08);
+    border: 1px solid rgba(232,196,106,0.2);
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 14px;
+    text-align: center;
+  }
+  .calc-total-label { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
+  .calc-total-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  /* AUCTION MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text);
+  }
+  .modal-subtitle { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 2px;
+    margin-top: -2px;
+  }
+  .modal-body { padding: 20px 24px; }
+  .modal-section { margin-bottom: 20px; }
+  .modal-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+  }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .detail-item {}
+  .detail-item-label { font-size: 10px; color: var(--text-faint); margin-bottom: 2px; }
+  .detail-item-val { font-size: 13px; color: var(--text); font-weight: 500; }
+  .detail-item-val.mono { font-family: 'DM Mono', monospace; }
+  .detail-item-val.red { color: var(--red); }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 7px;
+    margin-bottom: 16px;
+    font-size: 12px;
+  }
+  .alert-banner.warn {
+    background: rgba(232,196,106,0.08);
+    border: 1px solid rgba(232,196,106,0.25);
+    color: var(--yellow);
+  }
+  .alert-banner.danger {
+    background: rgba(255,77,77,0.08);
+    border: 1px solid rgba(255,77,77,0.25);
+    color: var(--red);
+  }
+  .alert-banner.info {
+    background: rgba(91,138,255,0.08);
+    border: 1px solid rgba(91,138,255,0.25);
+    color: var(--blue);
+  }
+
+  /* CHECKLIST */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .check-box {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 10px;
+  }
+  .check-box.done { background: var(--green); border-color: var(--green); color: #0e0f11; }
+  .check-box.warn { background: var(--yellow); border-color: var(--yellow); color: #0e0f11; }
+  .check-text { flex: 1; color: var(--text); }
+  .check-text.done-text { color: var(--text-dim); text-decoration: line-through; }
+  .check-status { font-size: 10px; color: var(--text-faint); font-family: 'DM Mono', monospace; }
+
+  /* SECTIONS */
+  .section-views > div { display: none; }
+  .section-views > div.active { display: block; }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeIn 0.3s ease forwards; }
+  @keyframes countUp {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* NOTICE */
+  .prototype-notice {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 10px;
+    color: var(--text-faint);
+    z-index: 99;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-name">StorePro Ops</div>
+    <div class="logo-sub">Delinquency Command Center</div>
+  </div>
+  <div class="nav-section">
+    <div class="facility-switcher" onclick="toggleFacility(this)">
+      <div>
+        <div class="facility-name">All Locations</div>
+        <div class="facility-count">14 facilities · CA + NV</div>
+      </div>
+      <span style="color:var(--text-faint);font-size:11px">⌄</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Workflow</div>
+    <a class="nav-item active" onclick="showSection('dashboard')">
+      <span class="nav-icon">⬡</span> Dashboard
+    </a>
+    <a class="nav-item" onclick="showSection('pipeline')">
+      <span class="nav-icon">⇄</span> Lien Pipeline
+      <span class="nav-badge">23</span>
+    </a>
+    <a class="nav-item" onclick="showSection('todo')">
+      <span class="nav-icon">✓</span> To-Do List
+      <span class="nav-badge">7</span>
+    </a>
+    <a class="nav-item" onclick="showSection('auctions')">
+      <span class="nav-icon">⚑</span> Auctions
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Reporting</div>
+    <a class="nav-item" onclick="showSection('ar')">
+      <span class="nav-icon">$</span> AR Aging
+    </a>
+    <a class="nav-item" onclick="showSection('calculator')">
+      <span class="nav-icon">◈</span> Cost Calculator
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Admin</div>
+    <a class="nav-item" onclick="showSection('compliance')">
+      <span class="nav-icon">⊛</span> Compliance Audit
+    </a>
+    <a class="nav-item" onclick="showSection('workflow')">
+      <span class="nav-icon">≡</span> Workflow Config
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div style="margin-bottom:4px;color:var(--text-dim)">Logged in as</div>
+    <div style="font-weight:600;color:var(--text);font-size:12px">VP of Operations</div>
+    <div style="font-size:10px;color:var(--text-faint);margin-top:1px">StorePro Management</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title">
+      <h1 id="page-title">Portfolio Overview</h1>
+      <p id="page-sub">Thursday, April 30, 2026 · All 14 locations · Auto-synced 3 min ago</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-outline" onclick="openModal()">⊕ New Delinquency</button>
+      <button class="btn btn-primary" onclick="showSection('calculator')">◈ Run Cost Model</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ALERT -->
+    <div class="alert-banner danger animate-in" id="topAlert">
+      ⚠ 3 units have missed the 90-day auction window — immediate action required. <span style="cursor:pointer;text-decoration:underline;margin-left:8px" onclick="showSection('todo')">View tasks →</span>
+    </div>
+
+    <div class="section-views">
+
+      <!-- ============================== DASHBOARD ============================== -->
+      <div class="active" id="view-dashboard">
+        <!-- METRICS -->
+        <div class="metrics-row animate-in">
+          <div class="metric-card red">
+            <div class="metric-label">Delinquent Units</div>
+            <div class="metric-value">87</div>
+            <div class="metric-sub">of 1,240 total · <span class="down">7.0%</span> rate</div>
+          </div>
+          <div class="metric-card orange">
+            <div class="metric-label">Over 90 Days</div>
+            <div class="metric-value">23</div>
+            <div class="metric-sub">26% of delinquent pool · <span class="down">↑ from 19</span></div>
+          </div>
+          <div class="metric-card green">
+            <div class="metric-label">AR Recovered MTD</div>
+            <div class="metric-value">$41.2k</div>
+            <div class="metric-sub"><span class="up">↑ 18%</span> vs last month</div>
+          </div>
+          <div class="metric-card blue">
+            <div class="metric-label">Auctions Scheduled</div>
+            <div class="metric-value">11</div>
+            <div class="metric-sub">next auction: May 8 · 3 facilities</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- PIPELINE SUMMARY -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Lien Cycle Progress</div>
+                <div class="card-subtitle">Units by stage across all locations</div>
+              </div>
+              <button class="btn btn-outline" style="font-size:11px;padding:5px 10px" onclick="showSection('pipeline')">Full view →</button>
+            </div>
+            <div class="card-body">
+              <div class="progress-wrap">
+                <div class="progress-meta"><span class="progress-label">Collections Notice (Day 1–30)</span><span class="progress-val">34 units</span></div>
+                <div class="progress-track"><div class="progress-fill" style="width:60%;background:var(--red)"></div></div>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-meta"><span class="progress-label">Pre-Lien Notice Sent</span><span class="progress-val">18 units</span></div>
+                <div class="progress-track"><div class="progress-fill" style="width:32%;background:var(--orange)"></div></div>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-meta"><span class="progress-label">Lien Filed (Day 30–60)</span><span class="progress-val">14 units</span></div>
+                <div class="progress-track"><div class="progress-fill" style="width:25%;background:var(--yellow)"></div></div>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-meta"><span class="progress-label">Compliance Audit</span><span class="progress-val">9 units</span></div>
+                <div class="progress-track"><div class="progress-fill" style="width:16%;background:var(--blue)"></div></div>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-meta"><span class="progress-label">Auction Advertised</span><span class="progress-val">7 units</span></div>
+                <div class="progress-track"><div class="progress-fill" style="width:12%;background:#a78bfa)"></div></div>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-meta"><span class="progress-label">Auction Complete</span><span class="progress-val">5 units</span></div>
+                <div class="progress-track"><div class="progress-fill" style="width:9%;background:var(--green)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECENT ACTIVITY -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Recent Activity</div>
+                <div class="card-subtitle">Automated workflow events</div>
+              </div>
+            </div>
+            <div class="card-body" style="padding:0 20px">
+              <div class="timeline">
+                <div class="tl-item">
+                  <div class="tl-dot done">✓</div>
+                  <div class="tl-body">
+                    <div class="tl-action">Lien notice mailed — Unit B-204, Stockton</div>
+                    <div class="tl-detail">Certified + email · $847 past due · Mariana K.</div>
+                    <div class="tl-date">Today 9:14 AM</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot alert">!</div>
+                  <div class="tl-body">
+                    <div class="tl-action">Auction window missed — Unit C-17, Fresno</div>
+                    <div class="tl-detail">Process exceeded 90 days · Manual review required</div>
+                    <div class="tl-date">Today 8:30 AM</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot done">✓</div>
+                  <div class="tl-body">
+                    <div class="tl-action">Auction completed — Unit A-115, Sacramento</div>
+                    <div class="tl-detail">Sold $2,100 · Net after fees $1,840 · Unit re-listed</div>
+                    <div class="tl-date">Yesterday 3:50 PM</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot done">✓</div>
+                  <div class="tl-body">
+                    <div class="tl-action">Payment received — Unit D-32, Modesto</div>
+                    <div class="tl-detail">$1,240 paid · Account cleared · Lien process cancelled</div>
+                    <div class="tl-date">Yesterday 11:02 AM</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot pending">⏱</div>
+                  <div class="tl-body">
+                    <div class="tl-action">Military verification pending — Unit G-09, Bakersfield</div>
+                    <div class="tl-detail">SCRA check required before auction scheduling</div>
+                    <div class="tl-date">Apr 28, 2:15 PM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AR TABLE PREVIEW -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Top Delinquencies — Immediate Attention</div>
+              <div class="card-subtitle">Units requiring action within 72 hours</div>
+            </div>
+            <button class="btn btn-outline" style="font-size:11px;padding:5px 10px" onclick="showSection('ar')">Full AR report →</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Unit</th>
+                  <th>Tenant</th>
+                  <th>Location</th>
+                  <th>Days Delinquent</th>
+                  <th>Balance</th>
+                  <th>Stage</th>
+                  <th>Next Action</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr onclick="openModal('C-17','Carlos M.','Fresno','93','$2,340','Auction Window Missed')">
+                  <td class="mono">C-17</td>
+                  <td>Carlos M.</td>
+                  <td class="dim">Fresno · CA</td>
+                  <td class="mono" style="color:var(--red)">93d</td>
+                  <td class="mono" style="color:var(--red)">$2,340</td>
+                  <td><span class="badge badge-red">Critical</span></td>
+                  <td>Manual override required</td>
+                  <td><button class="btn btn-danger" style="padding:4px 9px;font-size:10px">Review</button></td>
+                </tr>
+                <tr onclick="openModal('B-204','Mariana K.','Stockton','61','$847','Lien Filed')">
+                  <td class="mono">B-204</td>
+                  <td>Mariana K.</td>
+                  <td class="dim">Stockton · CA</td>
+                  <td class="mono" style="color:var(--orange)">61d</td>
+                  <td class="mono" style="color:var(--orange)">$847</td>
+                  <td><span class="badge badge-blue">Lien Filed</span></td>
+                  <td>Ad placement by May 2</td>
+                  <td><button class="btn btn-outline" style="padding:4px 9px;font-size:10px">Open</button></td>
+                </tr>
+                <tr onclick="openModal('G-09','[Deceased]','Bakersfield','77','$1,620','Hold — Verification')">
+                  <td class="mono">G-09</td>
+                  <td>[Deceased – hold]</td>
+                  <td class="dim">Bakersfield · CA</td>
+                  <td class="mono" style="color:var(--orange)">77d</td>
+                  <td class="mono">$1,620</td>
+                  <td><span class="badge badge-yellow">On Hold</span></td>
+                  <td>Legal review · probate</td>
+                  <td><button class="btn btn-outline" style="padding:4px 9px;font-size:10px">Open</button></td>
+                </tr>
+                <tr onclick="openModal('A-88','Trevor L.','Sacramento','34','$512','Pre-Lien Notice')">
+                  <td class="mono">A-88</td>
+                  <td>Trevor L.</td>
+                  <td class="dim">Sacramento · CA</td>
+                  <td class="mono" style="color:var(--yellow)">34d</td>
+                  <td class="mono">$512</td>
+                  <td><span class="badge badge-orange">Pre-Lien</span></td>
+                  <td>Certified mail due May 1</td>
+                  <td><button class="btn btn-outline" style="padding:4px 9px;font-size:10px">Open</button></td>
+                </tr>
+                <tr onclick="openModal('F-12','Kim T.','Modesto','28','$388','Collections Notice')">
+                  <td class="mono">F-12</td>
+                  <td>Kim T.</td>
+                  <td class="dim">Modesto · CA</td>
+                  <td class="mono" style="color:var(--text-dim)">28d</td>
+                  <td class="mono">$388</td>
+                  <td><span class="badge badge-gray">Collections</span></td>
+                  <td>Auto-reminder sent</td>
+                  <td><button class="btn btn-outline" style="padding:4px 9px;font-size:10px">Open</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== PIPELINE ============================== -->
+      <div id="view-pipeline">
+        <div class="alert-banner info animate-in">
+          ◈ This view shows every delinquent unit progressing through your 90-day lien-to-auction cycle. Click any card for the full detail view.
+        </div>
+        <div class="pipeline animate-in">
+          <div class="pipeline-col stage-1">
+            <div class="pipeline-col-header">
+              <div class="pipeline-col-name">Collections<br>Day 1–14</div>
+              <div class="pipeline-count" style="color:var(--red)">34</div>
+            </div>
+            <div class="pipeline-cards">
+              <div class="p-card" onclick="openModal('F-12','Kim T.','Modesto','28','$388','Collections Notice')">
+                <div class="p-card-unit">F-12 <span class="p-card-amount">$388</span></div>
+                <div class="p-card-name">Kim T. · Modesto</div>
+                <div class="p-card-days d-low">Day 28</div>
+              </div>
+              <div class="p-card">
+                <div class="p-card-unit">H-44 <span class="p-card-amount">$210</span></div>
+                <div class="p-card-name">Ravi P. · Fresno</div>
+                <div class="p-card-days d-low">Day 12</div>
+              </div>
+              <div class="p-card">
+                <div class="p-card-unit">D-01 <span class="p-card-amount">$470</span></div>
+                <div class="p-card-name">Amy R. · Stockton</div>
+                <div class="p-card-days d-low">Day 7</div>
+              </div>
+              <div class="p-card" style="text-align:center;color:var(--text-faint);font-size:11px;border-style:dashed">+31 more</div>
+            </div>
+          </div>
+          <div class="pipeline-col stage-2">
+            <div class="pipeline-col-header">
+              <div class="pipeline-col-name">Pre-Lien<br>Day 14–30</div>
+              <div class="pipeline-count" style="color:var(--orange)">18</div>
+            </div>
+            <div class="pipeline-cards">
+              <div class="p-card" onclick="openModal('A-88','Trevor L.','Sacramento','34','$512','Pre-Lien Notice')">
+                <div class="p-card-unit">A-88 <span class="p-card-amount">$512</span></div>
+                <div class="p-card-name">Trevor L. · Sacramento</div>
+                <div class="p-card-days d-mid">Day 34</div>
+              </div>
+              <div class="p-card">
+                <div class="p-card-unit">J-22 <span class="p-card-amount">$730</span></div>
+                <div class="p-card-name">Susan H. · Bakersfield</div>
+                <div class="p-card-days d-mid">Day 31</div>
+              </div>
+              <div class="p-card" style="text-align:center;color:var(--text-faint);font-size:11px;border-style:dashed">+16 more</div>
+            </div>
+          </div>
+          <div class="pipeline-col stage-3">
+            <div class="pipeline-col-header">
+              <div class="pipeline-col-name">Lien Filed<br>Day 30–60</div>
+              <div class="pipeline-count" style="color:var(--yellow)">14</div>
+            </div>
+            <div class="pipeline-cards">
+              <div class="p-card" onclick="openModal('B-204','Mariana K.','Stockton','61','$847','Lien Filed')">
+                <div class="p-card-unit">B-204 <span class="p-card-amount">$847</span></div>
+                <div class="p-card-name">Mariana K. · Stockton</div>
+                <div class="p-card-days d-mid">Day 61</div>
+              </div>
+              <div class="p-card">
+                <div class="p-card-unit">K-09 <span class="p-card-amount">$1,100</span></div>
+                <div class="p-card-name">Dan W. · Modesto</div>
+                <div class="p-card-days d-mid">Day 58</div>
+              </div>
+              <div class="p-card" style="text-align:center;color:var(--text-faint);font-size:11px;border-style:dashed">+12 more</div>
+            </div>
+          </div>
+          <div class="pipeline-col stage-4">
+            <div class="pipeline-col-header">
+              <div class="pipeline-col-name">Audit &amp;<br>Verification</div>
+              <div class="pipeline-count" style="color:var(--blue)">9</div>
+            </div>
+            <div class="pipeline-cards">
+              <div class="p-card" onclick="openModal('G-09','[Deceased]','Bakersfield','77','$1,620','Hold — Verification')">
+                <div class="p-card-unit">G-09 <span class="p-card-amount">$1,620</span></div>
+                <div class="p-card-name">[Hold] · Bakersfield</div>
+                <div class="p-card-days d-high">Day 77</div>
+              </div>
+              <div class="p-card">
+                <div class="p-card-unit">E-55 <span class="p-card-amount">$960</span></div>
+                <div class="p-card-name">Lena M. · Fresno</div>
+                <div class="p-card-days d-high">Day 72</div>
+              </div>
+              <div class="p-card" style="text-align:center;color:var(--text-faint);font-size:11px;border-style:dashed">+7 more</div>
+            </div>
+          </div>
+          <div class="pipeline-col stage-5">
+            <div class="pipeline-col-header">
+              <div class="pipeline-col-name">Auction<br>Advertised</div>
+              <div class="pipeline-count" style="color:#a78bfa">7</div>
+            </div>
+            <div class="pipeline-cards">
+              <div class="p-card">
+                <div class="p-card-unit">M-03 <span class="p-card-amount">$1,890</span></div>
+                <div class="p-card-name">Bob T. · Sacramento</div>
+                <div class="p-card-days d-high">Day 84</div>
+              </div>
+              <div class="p-card">
+                <div class="p-card-unit">N-18 <span class="p-card-amount">$2,100</span></div>
+                <div class="p-card-name">Joe F. · Stockton</div>
+                <div class="p-card-days d-high">Day 82</div>
+              </div>
+              <div class="p-card" style="text-align:center;color:var(--text-faint);font-size:11px;border-style:dashed">+5 more</div>
+            </div>
+          </div>
+          <div class="pipeline-col stage-6">
+            <div class="pipeline-col-header">
+              <div class="pipeline-col-name">Auction<br>Complete</div>
+              <div class="pipeline-count" style="color:var(--green)">5</div>
+            </div>
+            <div class="pipeline-cards">
+              <div class="p-card">
+                <div class="p-card-unit">A-115 <span class="p-card-amount" style="color:var(--green)">$2,100</span></div>
+                <div class="p-card-name">Sacramento · sold</div>
+                <div class="p-card-days d-done">Completed Apr 29</div>
+              </div>
+              <div class="p-card" style="text-align:center;color:var(--text-faint);font-size:11px;border-style:dashed">+4 more</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== TO-DO ============================== -->
+      <div id="view-todo">
+        <div class="alert-banner warn animate-in">
+          7 tasks require attention today. Completing these keeps all 14 facilities on track with state lien law deadlines.
+        </div>
+        <div class="card animate-in">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Prioritized Task List</div>
+              <div class="card-subtitle">Auto-generated from lien workflow · sorted by deadline urgency</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="checklist">
+              <div class="check-item">
+                <div class="check-box warn">!</div>
+                <div class="check-text"><strong style="color:var(--red)">OVERDUE</strong> — Unit C-17 (Fresno): Auction window exceeded 90 days. Manual override + legal review required before rescheduling.</div>
+                <div class="check-status">DUE NOW</div>
+              </div>
+              <div class="check-item">
+                <div class="check-box warn">!</div>
+                <div class="check-text">Unit B-204 (Stockton): Place online auction advertisement on StorageTreasures by May 2 to meet CA minimum notice window.</div>
+                <div class="check-status">DUE MAY 2</div>
+              </div>
+              <div class="check-item">
+                <div class="check-box warn">!</div>
+                <div class="check-text">Unit G-09 (Bakersfield): Upload military status verification result (SCRA search). Account on hold until confirmed.</div>
+                <div class="check-status">DUE MAY 3</div>
+              </div>
+              <div class="check-item">
+                <div class="check-box warn">!</div>
+                <div class="check-text">Unit A-88 (Sacramento): Certified mail pre-lien notice must be sent today. Tenant email also on file — include digital delivery.</div>
+                <div class="check-status">DUE TODAY</div>
+              </div>
+              <div class="check-item">
+                <div class="check-box">○</div>
+                <div class="check-text">Units M-03 + N-18 (Sacramento/Stockton): Confirm auction photos uploaded and listings verified on StorageTreasures prior to May 8 auction date.</div>
+                <div class="check-status">DUE MAY 6</div>
+              </div>
+              <div class="check-item">
+                <div class="check-box">○</div>
+                <div class="check-text">Fresno location: 4 new delinquencies entered since Monday. Confirm collections notices have been queued for auto-send.</div>
+                <div class="check-status">DUE MAY 5</div>
+              </div>
+              <div class="check-item">
+                <div class="check-box done">✓</div>
+                <div class="check-text check-text done-text">Unit A-115 (Sacramento): Auction complete. Proceeds of $2,100 logged. Unit relisted at $189/mo. Tenant file closed.</div>
+                <div class="check-status" style="color:var(--green)">DONE</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== AUCTIONS ============================== -->
+      <div id="view-auctions">
+        <div class="card animate-in">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Upcoming Auctions</div>
+              <div class="card-subtitle">Auto-scheduled from lien workflow · all ad placements managed</div>
+            </div>
+            <button class="btn btn-primary">+ Schedule Auction</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Auction Date</th>
+                  <th>Location</th>
+                  <th>Units</th>
+                  <th>Platform</th>
+                  <th>Ad Posted</th>
+                  <th>Photos</th>
+                  <th>Compliance</th>
+                  <th>Est. Recovery</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono">May 8, 2026</td>
+                  <td>Sacramento · CA</td>
+                  <td class="mono">4 units</td>
+                  <td>StorageTreasures</td>
+                  <td><span class="badge badge-green">Live</span></td>
+                  <td><span class="badge badge-green">Uploaded</span></td>
+                  <td><span class="badge badge-green">Clear</span></td>
+                  <td class="mono">~$7,200</td>
+                </tr>
+                <tr>
+                  <td class="mono">May 8, 2026</td>
+                  <td>Stockton · CA</td>
+                  <td class="mono">3 units</td>
+                  <td>StorageTreasures</td>
+                  <td><span class="badge badge-green">Live</span></td>
+                  <td><span class="badge badge-yellow">Pending 1</span></td>
+                  <td><span class="badge badge-yellow">Review</span></td>
+                  <td class="mono">~$4,800</td>
+                </tr>
+                <tr>
+                  <td class="mono">May 15, 2026</td>
+                  <td>Fresno · CA</td>
+                  <td class="mono">4 units</td>
+                  <td>StorageTreasures</td>
+                  <td><span class="badge badge-orange">Not yet</span></td>
+                  <td><span class="badge badge-orange">Not yet</span></td>
+                  <td><span class="badge badge-blue">Audit in progress</span></td>
+                  <td class="mono">~$5,600</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== AR ============================== -->
+      <div id="view-ar">
+        <div class="metrics-row animate-in">
+          <div class="metric-card red">
+            <div class="metric-label">Total AR Outstanding</div>
+            <div class="metric-value">$94.1k</div>
+            <div class="metric-sub">Across 87 delinquent units</div>
+          </div>
+          <div class="metric-card orange">
+            <div class="metric-label">90+ Day Debt</div>
+            <div class="metric-value">$41.3k</div>
+            <div class="metric-sub">44% of total AR · high write-off risk</div>
+          </div>
+          <div class="metric-card blue">
+            <div class="metric-label">Avg Days to Collect</div>
+            <div class="metric-value">68d</div>
+            <div class="metric-sub">Industry target: &lt;45 days</div>
+          </div>
+          <div class="metric-card green">
+            <div class="metric-label">Recovery Rate YTD</div>
+            <div class="metric-value">61%</div>
+            <div class="metric-sub"><span class="up">↑ 8pts</span> vs prior year</div>
+          </div>
+        </div>
+        <div class="card animate-in">
+          <div class="card-header">
+            <div class="card-title">AR Aging — All Locations</div>
+            <div class="card-subtitle" style="margin-top:2px">All delinquent accounts sorted by age</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Unit</th>
+                  <th>Tenant</th>
+                  <th>Location</th>
+                  <th>0–30d</th>
+                  <th>31–60d</th>
+                  <th>61–90d</th>
+                  <th>90d+</th>
+                  <th>Total</th>
+                  <th>Stage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono">C-17</td><td>Carlos M.</td><td class="dim">Fresno</td>
+                  <td class="mono dim">—</td><td class="mono dim">—</td><td class="mono dim">—</td>
+                  <td class="mono" style="color:var(--red)">$2,340</td>
+                  <td class="mono" style="color:var(--red)">$2,340</td>
+                  <td><span class="badge badge-red">Critical</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">G-09</td><td>[Hold]</td><td class="dim">Bakersfield</td>
+                  <td class="mono dim">—</td><td class="mono dim">—</td><td class="mono">$1,620</td>
+                  <td class="mono dim">—</td>
+                  <td class="mono">$1,620</td>
+                  <td><span class="badge badge-yellow">Hold</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">B-204</td><td>Mariana K.</td><td class="dim">Stockton</td>
+                  <td class="mono dim">—</td><td class="mono dim">—</td><td class="mono">$847</td>
+                  <td class="mono dim">—</td>
+                  <td class="mono">$847</td>
+                  <td><span class="badge badge-blue">Lien Filed</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">A-88</td><td>Trevor L.</td><td class="dim">Sacramento</td>
+                  <td class="mono dim">—</td><td class="mono">$512</td><td class="mono dim">—</td>
+                  <td class="mono dim">—</td>
+                  <td class="mono">$512</td>
+                  <td><span class="badge badge-orange">Pre-Lien</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">F-12</td><td>Kim T.</td><td class="dim">Modesto</td>
+                  <td class="mono">$388</td><td class="mono dim">—</td><td class="mono dim">—</td>
+                  <td class="mono dim">—</td>
+                  <td class="mono">$388</td>
+                  <td><span class="badge badge-gray">Collections</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== CALCULATOR ============================== -->
+      <div id="view-calculator">
+        <div class="card animate-in" style="max-width:860px">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Delinquency Cost Model</div>
+              <div class="card-subtitle">Understand what delinquency is costing StorePro annually — and what automation can recover</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="calc-inputs">
+              <div class="form-group">
+                <label class="form-label">Number of Locations</label>
+                <input class="form-input" id="c-locs" type="number" value="14" oninput="calcUpdate()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Avg Units per Location</label>
+                <input class="form-input" id="c-units" type="number" value="89" oninput="calcUpdate()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Avg Monthly Rent / Unit ($)</label>
+                <input class="form-input" id="c-rent" type="number" value="165" oninput="calcUpdate()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Current Delinquency Rate (%)</label>
+                <input class="form-input" id="c-delrate" type="number" value="7" oninput="calcUpdate()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">% of Delinquent Units 90d+</label>
+                <input class="form-input" id="c-over90" type="number" value="26" oninput="calcUpdate()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bad Debt Write-off Rate (%)</label>
+                <input class="form-input" id="c-writeoff" type="number" value="40" oninput="calcUpdate()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Staff Hours/Week on Delinquency</label>
+                <input class="form-input" id="c-hours" type="number" value="12" oninput="calcUpdate()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Staff Hourly Rate ($)</label>
+                <input class="form-input" id="c-rate" type="number" value="22" oninput="calcUpdate()">
+              </div>
+            </div>
+
+            <div class="calc-results">
+              <div class="calc-result-row">
+                <div class="calc-result-label">Annual Revenue Lost (Delinquent Units)</div>
+                <div class="calc-result-val" id="r-revloss">$0</div>
+              </div>
+              <div class="calc-result-row">
+                <div class="calc-result-label">Annual Bad Debt Write-offs (90d+)</div>
+                <div class="calc-result-val" id="r-baddebt">$0</div>
+              </div>
+              <div class="calc-result-row">
+                <div class="calc-result-label">Annual Labor Cost (Delinquency Management)</div>
+                <div class="calc-result-val" id="r-labor">$0</div>
+              </div>
+              <div class="calc-result-row">
+                <div class="calc-result-label">Extended Vacancy Revenue Loss</div>
+                <div class="calc-result-val" id="r-vacancy">$0</div>
+              </div>
+
+              <div class="calc-total">
+                <div class="calc-total-label">Total Annual Cost of Delinquency</div>
+                <div class="calc-total-val" id="r-total">$0</div>
+                <div style="margin-top:10px;font-size:11px;color:var(--text-dim)">
+                  With automation, you could recover <span id="r-savings" style="color:var(--green);font-weight:600">$0</span> per year (50% reduction estimate)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== COMPLIANCE ============================== -->
+      <div id="view-compliance">
+        <div class="alert-banner info animate-in">
+          50+ lease checks are run per tenant before any auction is authorized. The checklist below shows the audit status for Unit B-204.
+        </div>
+        <div class="grid-2">
+          <div class="card animate-in">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Lease Audit — Unit B-204, Stockton</div>
+                <div class="card-subtitle">Mariana K. · Day 61 delinquent · Lien Filed</div>
+              </div>
+              <span class="badge badge-yellow">In Progress</span>
+            </div>
+            <div class="card-body">
+              <div class="checklist">
+                <div class="check-item"><div class="check-box done">✓</div><div class="check-text">Primary tenant name matches FMS record</div></div>
+                <div class="check-item"><div class="check-box done">✓</div><div class="check-text">Lease signed and dated correctly</div></div>
+                <div class="check-item"><div class="check-box done">✓</div><div class="check-text">Alternate contact info on file</div></div>
+                <div class="check-item"><div class="check-box done">✓</div><div class="check-text">Email address captured in 2+ lease locations</div></div>
+                <div class="check-item"><div class="check-box done">✓</div><div class="check-text">Lien-on-goods clause present and signed</div></div>
+                <div class="check-item"><div class="check-box done">✓</div><div class="check-text">Military status affidavit included</div></div>
+                <div class="check-item"><div class="check-box done">✓</div><div class="check-text">SCRA check returned negative</div></div>
+                <div class="check-item"><div class="check-box warn">!</div><div class="check-text" style="color:var(--yellow)">Certified mail delivery confirmation pending (USPS tracking in progress)</div></div>
+                <div class="check-item"><div class="check-box">○</div><div class="check-text check-text done-text" style="text-decoration:none;color:var(--text-dim)">Pre-auction notice published (pending ad placement)</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card animate-in">
+            <div class="card-header">
+              <div class="card-title">Compliance Coverage</div>
+              <div class="card-subtitle">State-level rules applied to this account</div>
+            </div>
+            <div class="card-body">
+              <div class="progress-wrap">
+                <div class="progress-meta"><span class="progress-label">California Lien Law Compliance</span><span class="progress-val" style="color:var(--green)">Active</span></div>
+              </div>
+              <div style="font-size:12px;color:var(--text-dim);line-height:1.8">
+                <div>✓ &nbsp;CA requires certified mail AND email (if lease permits)</div>
+                <div>✓ &nbsp;14-day waiting period after lien notice enforced</div>
+                <div>✓ &nbsp;Online auction advertising permitted in CA</div>
+                <div>✓ &nbsp;UCC search not required in CA (no lender claim check needed)</div>
+                <div>✓ &nbsp;Newspaper ad not required for CA auctions post-2022 law</div>
+                <div style="color:var(--yellow)">⏱ &nbsp;Minimum 10 days ad run required before auction date</div>
+              </div>
+              <div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);font-size:11px;color:var(--text-dim)">
+                Workflow last synced with CA lien law database: <span style="color:var(--text);font-family:'DM Mono',monospace">Apr 30, 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== WORKFLOW ============================== -->
+      <div id="view-workflow">
+        <div class="card animate-in" style="max-width:700px">
+          <div class="card-header">
+            <div class="card-title">Workflow Configuration</div>
+            <div class="card-subtitle">Customize timing, templates, and escalation rules per state</div>
+          </div>
+          <div class="card-body">
+            <div class="alert-banner info" style="margin-bottom:20px">
+              These settings apply to all California locations. Override per-facility is available.
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Day 1 auto-reminder (SMS + Email)</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px">Sent at 9:00 AM tenant local time on day of first delinquency</div>
+                </div>
+                <div style="font-size:20px;cursor:pointer">🔵</div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Day 14 pre-lien notice (Certified Mail + Email)</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px">Triggered automatically from FMS · dual delivery per CA law</div>
+                </div>
+                <div style="font-size:20px;cursor:pointer">🔵</div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Day 30 lien filing trigger</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px">Lease audit auto-initiated · 50-point verification checklist</div>
+                </div>
+                <div style="font-size:20px;cursor:pointer">🔵</div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Day 60 auction ad placement</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px">Auto-uploaded to StorageTreasures · minimum 10-day run</div>
+                </div>
+                <div style="font-size:20px;cursor:pointer">🔵</div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Day 90 escalation alert (VP Ops)</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px">Email + in-app alert if unit has not cleared auction by day 90</div>
+                </div>
+                <div style="font-size:20px;cursor:pointer">🔵</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end section-views -->
+  </div>
+</main>
+
+<!-- UNIT DETAIL MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="m-title">Unit Detail</div>
+        <div class="modal-subtitle" id="m-sub">Delinquency record</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">Account Summary</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">Unit</div><div class="detail-item-val mono" id="m-unit">—</div></div>
+          <div class="detail-item"><div class="detail-item-label">Tenant</div><div class="detail-item-val" id="m-tenant">—</div></div>
+          <div class="detail-item"><div class="detail-item-label">Location</div><div class="detail-item-val" id="m-location">—</div></div>
+          <div class="detail-item"><div class="detail-item-label">Days Delinquent</div><div class="detail-item-val mono" id="m-days">—</div></div>
+          <div class="detail-item"><div class="detail-item-label">Balance Due</div><div class="detail-item-val mono red" id="m-balance">—</div></div>
+          <div class="detail-item"><div class="detail-item-label">Current Stage</div><div class="detail-item-val" id="m-stage">—</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Compliance Timeline</div>
+        <div class="timeline" id="m-timeline"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn btn-primary" style="flex:1">Send Notice</button>
+        <button class="btn btn-outline" style="flex:1">View Full File</button>
+        <button class="btn btn-danger" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="prototype-notice">PROTOTYPE · StorePro Ops v0.1</div>
+
+<script>
+// --- NAV ---
+const sections = ['dashboard','pipeline','todo','auctions','ar','calculator','compliance','workflow'];
+const titles = {
+  dashboard: ['Portfolio Overview','Thursday, April 30, 2026 · All 14 locations · Auto-synced 3 min ago'],
+  pipeline: ['Lien Pipeline','All delinquent units by stage · Click any card to open detail'],
+  todo: ['To-Do List','7 tasks pending · Sorted by deadline urgency'],
+  auctions: ['Auction Manager','Upcoming & completed auctions · Ad placement tracked'],
+  ar: ['AR Aging Report','Outstanding receivables by age and location'],
+  calculator: ['Delinquency Cost Model','Quantify the financial impact · Model automation ROI'],
+  compliance: ['Compliance Audit','State-specific lien law checks · 50-point verification'],
+  workflow: ['Workflow Configuration','Customize automation rules per state and facility'],
+};
+
+function showSection(id) {
+  sections.forEach(s => {
+    const el = document.getElementById('view-'+s);
+    if (el) el.classList.remove('active');
+  });
+  const target = document.getElementById('view-'+id);
+  if (target) { target.classList.add('active'); target.classList.add('animate-in'); }
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
+  });
+  const t = titles[id] || ['Dashboard',''];
+  document.getElementById('page-title').textContent = t[0];
+  document.getElementById('page-sub').textContent = t[1];
+  if (id === 'calculator') calcUpdate();
+}
+
+// --- CALCULATOR ---
+function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+function calcUpdate() {
+  const locs = parseFloat(document.getElementById('c-locs').value)||0;
+  const units = parseFloat(document.getElementById('c-units').value)||0;
+  const rent = parseFloat(document.getElementById('c-rent').value)||0;
+  const delRate = parseFloat(document.getElementById('c-delrate').value)||0;
+  const over90 = parseFloat(document.getElementById('c-over90').value)||0;
+  const writeoff = parseFloat(document.getElementById('c-writeoff').value)||0;
+  const hours = parseFloat(document.getElementById('c-hours').value)||0;
+  const rate = parseFloat(document.getElementById('c-rate').value)||0;
+
+  const totalUnits = locs * units;
+  const delUnits = totalUnits * (delRate/100);
+  const revLoss = delUnits * rent * 12;
+  const over90units = delUnits * (over90/100);
+  const badDebt = over90units * rent * (writeoff/100) * 3; // 3 mo avg
+  const labor = locs * hours * 52 * rate;
+  const vacancy = over90units * rent * 2; // avg 2 extra months vacant
+  const total = revLoss + badDebt + labor + vacancy;
+  const savings = total * 0.5;
+
+  document.getElementById('r-revloss').textContent = fmt(revLoss);
+  document.getElementById('r-baddebt').textContent = fmt(badDebt);
+  document.getElementById('r-labor').textContent = fmt(labor);
+  document.getElementById('r-vacancy').textContent = fmt(vacancy);
+  document.getElementById('r-total').textContent = fmt(total);
+  document.getElementById('r-savings').textContent = fmt(savings);
+}
+
+// --- MODAL ---
+function openModal(unit, tenant, location, days, balance, stage) {
+  if (!unit) { unit='B-204'; tenant='Mariana K.'; location='Stockton'; days='61'; balance='$847'; stage='Lien Filed'; }
+  document.getElementById('m-title').textContent = 'Unit ' + unit + ' · ' + location;
+  document.getElementById('m-sub').textContent = tenant + ' · Delinquency file';
+  document.getElementById('m-unit').textContent = unit;
+  document.getElementById('m-tenant').textContent = tenant;
+  document.getElementById('m-location').textContent = location + ' · CA';
+  document.getElementById('m-days').textContent = days + ' days';
+  document.getElementById('m-balance').textContent = balance;
+  document.getElementById('m-stage').innerHTML = '<span class="badge badge-orange">' + stage + '</span>';
+
+  const d = parseInt(days);
+  document.getElementById('m-timeline').innerHTML = `
+    <div class="tl-item">
+      <div class="tl-dot done">✓</div>
+      <div class="tl-body"><div class="tl-action">Collections notice sent (Day 1)</div><div class="tl-detail">SMS + email reminder triggered automatically</div><div class="tl-date">${d-1} days ago</div></div>
+    </div>
+    ${d >= 14 ? `<div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-body"><div class="tl-action">Pre-lien notice sent (Day 14)</div><div class="tl-detail">Certified mail dispatched · email delivered</div><div class="tl-date">${d-14} days ago</div></div></div>` : '<div class="tl-item"><div class="tl-dot future">○</div><div class="tl-body"><div class="tl-action">Pre-lien notice (Day 14)</div><div class="tl-detail">Pending</div></div></div>'}
+    ${d >= 30 ? `<div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-body"><div class="tl-action">Lien filed (Day 30)</div><div class="tl-detail">50-point lease audit initiated · state law applied</div><div class="tl-date">${d-30} days ago</div></div></div>` : '<div class="tl-item"><div class="tl-dot future">○</div><div class="tl-body"><div class="tl-action">Lien filing (Day 30)</div><div class="tl-detail">Pending</div></div></div>'}
+    ${d >= 60 ? `<div class="tl-item"><div class="tl-dot pending">⏱</div><div class="tl-body"><div class="tl-action">Auction ad placed (Day 60)</div><div class="tl-detail">StorageTreasures · minimum 10-day run</div><div class="tl-date">${d-60} days ago</div></div></div>` : '<div class="tl-item"><div class="tl-dot future">○</div><div class="tl-body"><div class="tl-action">Auction ad placement (Day 60)</div><div class="tl-detail">Pending</div></div></div>'}
+    ${d >= 90 ? `<div class="tl-item"><div class="tl-dot alert">!</div><div class="tl-body"><div class="tl-action">Auction window exceeded</div><div class="tl-detail">Manual review required · escalated to VP Ops</div></div></div>` : '<div class="tl-item"><div class="tl-dot future">○</div><div class="tl-body"><div class="tl-action">Auction completion (Day 70–90)</div><div class="tl-detail">Pending</div></div></div>'}
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target.id === 'modal') closeModal(); }
+
+function toggleFacility(el) {
+  const names = ['All Locations','Sacramento Only','Fresno Only','Stockton Only'];
+  const counts = ['14 facilities · CA + NV','3 facilities · CA','2 facilities · CA','2 facilities · CA'];
+  const n = el.querySelector('.facility-name');
+  const c = el.querySelector('.facility-count');
+  const i = names.indexOf(n.textContent);
+  const next = (i+1) % names.length;
+  n.textContent = names[next];
+  c.textContent = counts[next];
+}
+
+// Init calculator
+calcUpdate();
+</script>
+</body>
+</html>

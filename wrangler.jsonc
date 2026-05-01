@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "helius-website",
+  "account_id": "5311490b2ca73665d794ba1c03ca76ff",
   "compatibility_date": "2026-04-30",
   "assets": {
     "directory": "./dist",
